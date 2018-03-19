@@ -1,0 +1,7 @@
+// sequelizerc 방식이 엄청 마음에 들진 않지만..
+var path = require('path')
+
+module.exports = {
+  'config':          path.resolve('config', 'db.js'),
+  'migrations-path': path.resolve('db', 'migrations')
+}
