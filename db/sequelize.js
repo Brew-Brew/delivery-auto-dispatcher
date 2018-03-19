@@ -6,7 +6,6 @@ const {
   MYSQL_USER: USER,
   MYSQL_PASSWORD: PASSWORD,
 } = process.env;
-
 const db = new Sequelize(DATABASE, USER, PASSWORD, {
   host: HOST,
   dialect: 'mysql',
@@ -20,7 +19,7 @@ const db = new Sequelize(DATABASE, USER, PASSWORD, {
 
 
 db.authenticate().then(() => {
-  console.log('MySQL Database Connect Success');
+  console.log(`MySQL Database ${DATABASE} Connect Success`);
 }).catch((error) => {
   console.log('error');
 });

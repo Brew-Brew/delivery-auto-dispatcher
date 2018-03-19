@@ -45,11 +45,11 @@ module.exports = class Cron {
 
   stop(name) {
     this.jobs[name].process.stop();
-    console.log('start');
+    console.log('stop');
   }
 
   start(name) {
     this.jobs[name].process.start();
-    console.log('stop');
+    console.log('cron start');
   }
 };
