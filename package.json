@@ -1,0 +1,22 @@
+{
+  "name": "deliverystatus-updater",
+  "version": "1.0.0",
+  "description": "deliverystatus updater",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3",
+    "logger": "0.0.1",
+    "moment": "^2.21.0",
+    "node-cron": "^1.2.1",
+    "node-fetch": "^2.1.1",
+    "nodemon": "^1.17.2",
+    "sequelize": "^4.37.0"
+  }
+}

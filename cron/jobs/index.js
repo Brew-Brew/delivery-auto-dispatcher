@@ -1,0 +1,1 @@
+exports.autoDispatcher = require('./autoDispatcher');
