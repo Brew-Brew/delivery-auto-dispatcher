@@ -1,4 +1,4 @@
-const db = require('../../../db/sequelize');
+const db = require('../../../src/db/sequelize');
 const orderMeta = require('./orderMeta')(db);
 const timeSlot = require('./timeSlot')(db);
 

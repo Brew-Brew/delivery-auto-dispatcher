@@ -1,12 +1,19 @@
 const Cron = require('../cron');
 const jobName = 'autoDispatcher';
+const SOCKET_URL=process.env.SOCKET;
 const moment = require('moment');
 const { Op } = require('sequelize');
+const fetch = require('node-fetch');
+const io =require('socket.io-client');
+const getOrder = require('../../../database/schema/mongoDatabases/plating_orders');
+const socket = io(SOCKET_URL);
 //자동배차와 관련한 크론 job
 const {
   orderMeta,
   timeSlot,
-} = require('../../database/schema/platingDatabase');
+} = require('../../../database/schema/platingDatabase');
+
+const generateReceipt = require('../../utils/generateReceipt');
 
 module.exports = () => {
   const cron = new Cron();
@@ -31,7 +38,7 @@ module.exports = () => {
       //주문관련 정보를 받아온다.
       const orders = await orderMeta.findAll(orderOptions);
       if(orders.length === 0){
-        console.log('모두 배송접수 되었습니다.!');
+        console.log('배송접수할 것이 없습니다.!');
       }
 
       //각 주문에 해당하는 timeslot정보를 가져온다.
@@ -50,6 +57,7 @@ module.exports = () => {
       //배달원하는시간과 현재시간을 체크하여 부릉 api에 접수해준다.
       // if( timeslot.timeStr- 현재시간 <=1시간) -> 접수
       // 날짜도 체크해야한다.
+
       //현재시간관련 즉시 실행함수
       var nowTime = (function () {
         var now = moment().format("HH:mm");
@@ -79,18 +87,32 @@ module.exports = () => {
       //남은 시간 양수여야 실행한다.
       if(hour_gap >= 0 && min_gap >0){
         console.log('배송까지 약 ' + hour_gap + '시간 '+min_gap+'분 남았습니다.');
-        if( hour_gap <=1 ){
-        //접수 프로세스
-        // await Promise.all(
-        //   orders.map(order =>
-        //     order.update({
-        //       delivery_type: 'vroong',
-        //       },
-        //       { where: {id: od.id}},
-        //     )
-        //   )
-        // );
-        console.log(`배송까지 남은시간 <= 1시간 이므로 주문번호: ${od.id}를 접수하였습니다.`);
+        if( hour_gap < 1 ){
+          //접수 프로세스
+          //generateReceipt 부분을 배차고에서 가져온다.
+          //예외 상황을 처리해준다. 성동구 + 사내
+          const order = await getOrder(od.id);
+
+          //플팅 예외처리
+          if((order.address).indexOf('논현동 122-8') > 0){
+            console.log('플팅에서 시킴');
+          }
+          else{
+            const receipt = generateReceipt(order);
+            console.log(receipt);
+          }
+          //영수증 포맷 생성
+
+          // console.log(`배송까지 남은시간 <= 1시간 이므로 주문번호: ${od.id}를 접수하였습니다.`);
+          //   socket.emit('onDeliveryTypeSettingButtonPressed', {
+          //   orderIdx: od.id,
+          //   deliveryType: 'vroong',
+          //   receipt,
+          // });
+          // await requestVroongOrder(od.id).then(function(res){
+          //   console.log(`배송까지 남은시간 <= 1시간 이므로 주문번호: ${od.id}를 접수하였습니다.`);
+          // })
+          //위는 접수 테스트이고, 이룰 아래의 requestVroongOrder 함수로 바꾸면 됨.
         }
       }
       else{
@@ -98,10 +120,61 @@ module.exports = () => {
       }
     });
 
-
-
     } catch (error) {
       console.log(error);
     }
   });
 };
+
+//접수관련 빅보스에서 따왔음
+function requestVroongOrder(orderIdx) {
+    let status = 400;
+    return fetch(`https://gatewaylab.plating.co.kr/vroong/order/${orderIdx}`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => {
+      status = response.status;
+      return response.json();
+    });
+  }
+
+//빌지 출력과 deliverytype 변경관련
+  async function changeDeliveryWithPrint(orderIdx) {
+    //generateReceipt 부분을 배차고에서 가져온다.
+    const order = await getOrder(orderIdx);
+    //영수증 포맷 생성
+    const receipt = generateReceipt(order);
+
+    let status = 400;
+    fetch(`https://store.plating.co.kr/vroong/order/${orderIdx}`, {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((res) => {
+        status = res.status;
+        return res.json();
+      })
+      .then((json) => {
+        if (status >= 400) {
+          return Promise.reject(json);
+        } else {
+          socket.emit('onDeliveryTypeSettingButtonPressed', {
+            orderIdx,
+            deliveryType: 'vroong',
+            receipt,
+          });
+        }
+      })
+      .catch((json) => {
+        console.log(json);
+      });
+}
