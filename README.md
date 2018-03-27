@@ -10,7 +10,7 @@
 //1. 접수관련 빅보스에서 따왔음
 function requestVroongOrder(orderIdx) {
     let status = 400;
-    return fetch(`https://gatewaylab.plating.co.kr/vroong/order/${orderIdx}`, {
+    return fetch(``, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
@@ -33,7 +33,7 @@ function requestVroongOrder(orderIdx) {
       const receipt = generateReceipt(order);
 
       let status = 400;
-        fetch(`https://store.plating.co.kr/vroong/order/${orderId}`, {
+        fetch(``, {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
