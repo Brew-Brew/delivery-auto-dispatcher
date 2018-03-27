@@ -27,5 +27,5 @@ async function start() {
 }
 
 start().then(()=>{
-  console.log('소켓,몽고db,크론 모두 정상적으로 연결되었습니다.')
+  console.log('소켓,몽고db,크론 모두 정상적으로 연결되었습니다.');
 })
