@@ -13,7 +13,7 @@ const mongodbURL = process.env.MONGODB_URL || 'mongodb://mongodb.test.plating.co
 const Mongo = mongoose.connect(mongodbURL, function () {
   console.log('몽고db와 연결되었습니다.')
 });
-Network.init();
+
 //크론이 시작되면 할당된 작업들을 실행해준다.
 const Cron = cron.init((jobs) => {
     db.authenticate();
