@@ -100,7 +100,7 @@ module.exports = () => {
           else{
             const receipt = generateReceipt(order);
             console.log(receipt);
-            //여기서 프린트를 해보려는데 안되네용...
+            //아래 1,2를 하기에 잎서서 여기서 테스트로 프린트를 해보려는데 안되네용...
             Network.print(od.id);
             //1.
             //프로미스를  리턴안했는데도 왜 될까..?
